@@ -22,11 +22,24 @@ class Tablero(object):
         self.turno = primerJugador
         self.maxDepth = 10
 
+    def actualizarTablero(self):
+        """
+            Actualiza la array que contiene el Tablero para reflejar el estado actual de las fichas en el
+            tablero
+        """
+        for i in range(self.ancho):
+            for j in range(self.largo):
+                self.TableroState[i][j] = " "
+        for ficha in self.listaNegro:
+            self.TableroState[ficha[1]][ficha[0]] = u'◆'
+        for ficha in self.listaBlanco:
+            self.TableroState[ficha[1]][ficha[0]] = u'◇'
+
     def printTablero(self):
 
-        print (unicode(self))
+        print (str(self))
         
-    def __unicode__(self):
+    def __str__(self):
         
         # actualiza el Tablero
         self.actualizarTablero()
