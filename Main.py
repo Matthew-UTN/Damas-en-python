@@ -5,7 +5,6 @@ tmp = 0
 largo = 0
 primerjugador = 0
 
-
 print("Bienvenido")
 while True:
   tmp=int(input("Selecciona el tamaño del tablero entre 6 y 10."))
