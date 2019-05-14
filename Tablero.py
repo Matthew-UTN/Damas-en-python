@@ -14,6 +14,9 @@ class Tablero(object):
         for i in range(ancho):
             self.listaNegro.append((i, (i+1)%2))
             self.listaBlanco.append((i, largo - (i%2) - 1))
+        for i in range(4):
+            self.listaNegro.append((1+(i*2), 2))
+            self.listaBlanco.append((0+(i*2), 5))
         # TableroState contiene el estado actual del Tablero para mostrar
         self.TableroState = [[' '] * self.ancho for x in range(self.largo)]
         self.juegoGanado = self.NOTERMINADO

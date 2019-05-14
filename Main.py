@@ -1,5 +1,5 @@
 from Tablero import *
-from IA import * # este seria el nombre de la clase
+from IA import minMax2
 
 
 ancho = 0
@@ -48,7 +48,7 @@ while b.juegoGanado == -1:
         print ("Movimiento invalido")
         continue
         
-    temp = minMax2(b)#un metodo que necesito
+    temp = minMax2(b)
     b = temp[0]
     print ("**********I.A**********")
     b.printTablero()
