@@ -22,7 +22,7 @@ class Tablero(object):
         self.juegoGanado = self.NOTERMINADO
         self.turno = primerJugador
         self.maxDepth = 10
-    
+
     # genera movimientos
     def iterBlancoMueve(self):
         """
@@ -116,7 +116,7 @@ class Tablero(object):
             self.listaNegro[self.listaNegro.index(movimientoDesde)] = movimientoAdondeSeVa
             self.actualizarTablero()
             self.turno = self.BLANCO
-            self.juegoGanado = Resultado
+            #self.juegoGanado = Resultado
         else:
             raise Exception
         
@@ -132,7 +132,7 @@ class Tablero(object):
             self.listaBlanco[self.listaBlanco.index(movimientoDesde)] = movimientoAdondeSeVa
             self.actualizarTablero()
             self.turno = self.NEGRO
-            self.juegoGanado = Resultado
+            #self.juegoGanado = Resultado
         else:
             raise Exception
     
