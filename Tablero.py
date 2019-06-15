@@ -27,6 +27,34 @@ class Tablero:
         self.salto = 0
         self.saltos_obligatorios = []
 
+    def adelante_D(self):
+        return (self.vacio >> 4) & self.adelante[self.activo]
+    def adelante_I(self):
+        return (self.vacio >> 5) & self.adelante[self.activo]
+    def atras_D(self):
+        return (self.vacio << 4) & self.atras[self.activo]
+    def atras_I(self):
+        return (self.vacio << 5) & self.atras[self.activo]
+
+    def sacar_movi(self):
+        # Primero ve si hay un salto que se necesita hacer
+        if self.salto:
+            return self.saltos_obligatorios
+
+        # movimiento normal
+        else:
+            AdD = self.adelante_D()
+            AdI = self.adelante_I()
+            AtD = self.atras_D()
+            AtI = self.atras_I()
+
+            moves =  [0x11 << i for (i, bit) in enumerate(bin(AdD)[::-1]) if bit == '1']
+            moves += [0x21 << i for (i, bit) in enumerate(bin(AdI)[::-1]) if bit == '1']
+            moves += [0x11 << i - 4 for (i, bit) in enumerate(bin(AtD)[::-1]) if bit == '1']
+            moves += [0x21 << i - 5 for (i, bit) in enumerate(bin(AtI)[::-1]) if bit == '1']
+            return moves
+
+
     def __str__(self):
         vacio = -1
         REY_NEGRO = 2
