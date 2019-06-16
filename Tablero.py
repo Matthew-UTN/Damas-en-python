@@ -49,6 +49,7 @@ class Tablero:
         llegada = opcion & self.fichas[activo]
         self.vacio = BITS_no_usados ^ (2**36 - 1) ^ (self.fichas[NEGRO] | self.fichas[BLANCO]) 
 
+
         if activo == NEGRO and (llegada & 0x780000000) != 0:
             self.atras[NEGRO] |= llegada
         elif activo == BLANCO and (llegada & 0xf) != 0:
@@ -65,11 +66,24 @@ class Tablero:
         return (self.vacio << 4) & self.atras[self.activo]
     def atras_I(self):
         return (self.vacio << 5) & self.atras[self.activo]
+    def salto_adelante_D(self):
+        return (self.vacio >> 8) & (self.fichas[self.pasivo] >> 4) & self.adelante[self.activo]
+    def salto_adelante_I(self):
+        return (self.vacio >> 10) & (self.fichas[self.pasivo] >> 5) & self.adelante[self.activo]
+    def salto_atras_D(self):
+        return (self.vacio << 8) & (self.fichas[self.pasivo] << 4) & self.atras[self.activo]
+    def salto_atras_I(self):
+        return (self.vacio << 10) & (self.fichas[self.pasivo] << 5) & self.atras[self.activo]
 
     def sacar_movi(self):
         # Primero ve si hay un salto que se necesita hacer
         if self.salto:
             return self.saltos_obligatorios
+
+        # ver si hay muchos saltos this is missing in main code
+        saltos = self.buscar_saltos()
+        if saltos:
+            return saltos
 
         # movimiento normal
         else:
@@ -78,12 +92,27 @@ class Tablero:
             AtD = self.atras_D()
             AtI = self.atras_I()
 
-            moves =  [0x11 << i for (i, bit) in enumerate(bin(AdD)[::-1]) if bit == '1']
-            moves += [0x21 << i for (i, bit) in enumerate(bin(AdI)[::-1]) if bit == '1']
-            moves += [0x11 << i - 4 for (i, bit) in enumerate(bin(AtD)[::-1]) if bit == '1']
-            moves += [0x21 << i - 5 for (i, bit) in enumerate(bin(AtI)[::-1]) if bit == '1']
-            return moves
+            opciones =  [0x11 << i for (i, bit) in enumerate(bin(AdD)[::-1]) if bit == '1']
+            opciones += [0x21 << i for (i, bit) in enumerate(bin(AdI)[::-1]) if bit == '1']
+            opciones += [0x11 << i - 4 for (i, bit) in enumerate(bin(AtD)[::-1]) if bit == '1']
+            opciones += [0x21 << i - 5 for (i, bit) in enumerate(bin(AtI)[::-1]) if bit == '1']
+            return opciones
+    
+    def buscar_saltos(self):
+        SAdD = self.salto_adelante_D()
+        SAdI = self.salto_adelante_I()
+        SAtD = self.salto_atras_D()
+        SAtI = self.salto_atras_I()
 
+        opciones = []
+
+        if (SAdD | SAdI | SAtD | SAtI) != 0:
+            opciones += [-0x101 << i for (i, bit) in enumerate(bin(SAdD)[::-1]) if bit == '1']
+            opciones += [-0x401 << i for (i, bit) in enumerate(bin(SAdI)[::-1]) if bit == '1']
+            opciones += [-0x101 << i - 8 for (i, bit) in enumerate(bin(SAtD)[::-1]) if bit == '1']
+            opciones += [-0x401 << i - 10 for (i, bit) in enumerate(bin(SAtI)[::-1]) if bit == '1']
+
+        return opciones
 
     def __str__(self):
         vacio = -1
