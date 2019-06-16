@@ -18,12 +18,11 @@ def main():
         B = Tablero.Tablero()
         print ("Negro va primero.")
         Turno = 1
-        jugador_actual = B.activo
         while not termino(B):
             print(B)
             Movimientos = B.sacar_movi()
             for (i, move) in enumerate(strings_movi(B)):
-                print ("Mover " + str(i) + ": " + move)
+                print ("Opcion " + str(i) + ": " + move)
             while True:
                 movi_idx = input("Ingrese que movimiento quieres hacer: ")
                 try:
@@ -36,6 +35,10 @@ def main():
                 else:
                     print ("Ingrese un numero valido.")
                     continue
+            B.hacer_movi(Movimientos[movi_idx])
+            Turno += 1
+
+        print (B)
 
 
 def termino(Tablero):

@@ -26,6 +26,36 @@ class Tablero:
 
         self.salto = 0
         self.saltos_obligatorios = []
+    
+    def hacer_movi(self, opcion):
+        activo = self.activo
+        pasivo = self.pasivo
+        if opcion < 0:
+            opcion *= -1
+            taken_piece = int(1 << int ( sum(i for (i, b) in enumerate(bin(opcion)[::-1]) if b == '1')/2))
+            self.fichas[pasivo] ^= taken_piece
+            if self.adelante[pasivo] & taken_piece:
+                self.adelante[pasivo] ^= taken_piece
+            if self.atras[pasivo] & taken_piece:
+                self.atras[pasivo] ^= taken_piece
+            self.salto = 1
+
+        self.fichas[activo] ^= opcion
+        if self.adelante[activo] & opcion:
+            self.adelante[activo] ^= opcion
+        if self.atras[activo] & opcion:
+            self.atras[activo] ^= opcion
+
+        llegada = opcion & self.fichas[activo]
+        self.vacio = BITS_no_usados ^ (2**36 - 1) ^ (self.fichas[NEGRO] | self.fichas[BLANCO]) 
+
+        if activo == NEGRO and (llegada & 0x780000000) != 0:
+            self.atras[NEGRO] |= llegada
+        elif activo == BLANCO and (llegada & 0xf) != 0:
+            self.adelante[BLANCO] |= llegada
+
+        self.salto = 0
+        self.activo, self.pasivo = self.pasivo, self.activo
 
     def adelante_D(self):
         return (self.vacio >> 4) & self.adelante[self.activo]
