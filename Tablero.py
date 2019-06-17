@@ -58,6 +58,44 @@ class Tablero:
         self.salto = 0
         self.activo, self.pasivo = self.pasivo, self.activo
 
+    def ver_movimientos(self, opcion):
+        B = self.copiar()
+        activo = B.activo
+        pasivo = B.pasivo
+        if opcion < 0:
+            opcion *= -1
+            taken_piece = int(1 << sum(i for (i, b) in enumerate(bin(opcion)[::-1]) if b == '1')/2)
+            B.fichas[pasivo] ^= taken_piece
+            if B.adelante[pasivo] & taken_piece:
+                B.adelante[pasivo] ^= taken_piece
+            if B.atras[pasivo] & taken_piece:
+                B.atras[pasivo] ^= taken_piece
+            B.salto = 1
+
+        B.fichas[activo] ^= opcion
+        if B.adelante[activo] & opcion:
+            B.adelante[activo] ^= opcion
+        if B.atras[activo] & opcion:
+            B.atras[activo] ^= opcion
+
+        llegada = opcion & B.fichas[activo]
+        B.vacio = BITS_no_usados ^ (2**36 - 1) ^ (B.fichas[NEGRO] | B.fichas[BLANCO])
+
+        if B.salto:
+            B.saltos_obligatorios = B.saltos_desde(llegada)
+            if B.saltos_obligatorios: 
+                return B
+
+        if activo == NEGRO and (llegada & 0x780000000) != 0:
+            B.atras[NEGRO] |= llegada
+        elif activo == BLANCO and (llegada & 0xf) != 0:
+            B.adelante[BLANCO] |= llegada
+
+        B.salto = 0
+        B.activo, B.pasivo = B.pasivo, B.activo
+
+        return B
+
     def adelante_D(self):
         return (self.vacio >> 4) & self.adelante[self.activo]
     def adelante_I(self):
@@ -113,6 +151,63 @@ class Tablero:
             opciones += [-0x401 << i - 10 for (i, bit) in enumerate(bin(SAtI)[::-1]) if bit == '1']
 
         return opciones
+    
+    def saltos_desde(self, piece):
+        if self.activo == NEGRO:
+            SAdD = (self.vacio >> 8) & (self.fichas[self.pasivo] >> 4) & piece
+            SAdI = (self.vacio >> 10) & (self.fichas[self.pasivo] >> 5) & piece
+            if piece & self.atras[self.activo]: # piece at square is a king
+                SAtD = (self.vacio << 8) & (self.fichas[self.pasivo] << 4) & piece
+                SAtI = (self.vacio << 10) & (self.fichas[self.pasivo] << 5) & piece
+            else:
+                SAtD = 0
+                SAtI = 0
+        else:
+            SAtD = (self.vacio << 8) & (self.fichas[self.pasivo] << 4) & piece
+            SAtI = (self.vacio << 10) & (self.fichas[self.pasivo] << 5) & piece
+            if piece & self.adelante[self.activo]: # piece at square is a king
+                SAdD = (self.vacio >> 8) & (self.fichas[self.pasivo] >> 4) & piece
+                SAdI = (self.vacio >> 10) & (self.fichas[self.pasivo] >> 5) & piece
+            else:
+                SAdD = 0
+                SAdI = 0
+
+        opciones = []
+        if (SAdD | SAdI | SAtD | SAtI) != 0:
+            opciones += [-0x101 << i for (i, bit) in enumerate(bin(SAdD)[::-1]) if bit == '1']
+            opciones += [-0x401 << i for (i, bit) in enumerate(bin(SAdI)[::-1]) if bit == '1']
+            opciones += [-0x101 << i - 8 for (i, bit) in enumerate(bin(SAtD)[::-1]) if bit == '1']
+            opciones += [-0x401 << i - 10 for (i, bit) in enumerate(bin(SAtI)[::-1]) if bit == '1']
+
+        return opciones
+
+    def tomable(self, piece):
+        activo = self.activo
+        if (self.adelante[activo] & (piece >> 4)) != 0 and (self.vacio & (piece << 4)) != 0:
+            return True
+        if (self.adelante[activo] & (piece >> 5)) != 0 and (self.vacio & (piece << 5)) != 0:
+            return True
+        if (self.atras[activo] & (piece << 4)) != 0 and (self.vacio & (piece >> 4)) != 0:
+            return True
+        if (self.atras[activo] & (piece << 5)) != 0 and (self.vacio & (piece >> 5)) != 0:
+            return True
+        return False
+
+    def se_termino(self):
+        return len(self.sacar_movi()) == 0
+
+    def copiar(self):
+        #Returna un tablero nuevo
+        B = Tablero()
+        B.activo = self.activo
+        B.atras = [x for x in self.atras]
+        B.vacio = self.vacio
+        B.adelante = [x for x in self.adelante]
+        B.salto = self.salto
+        B.saltos_obligatorios = [x for x in self.saltos_obligatorios]
+        B.pasivo = self.pasivo
+        B.fichas = [x for x in self.fichas]
+        return B
 
     def __str__(self):
         vacio = -1

@@ -86,12 +86,12 @@ def strings_movi(Tablero):
                     for (i, bit) in enumerate(bin(SAtI)[::-1]) if bit == '1']
 
         if Tablero.activo == NEGRO:
-            movi_reg = ["%i to %i" % (orig, dest) for (orig, dest) in SAdD + SAdI]
-            movi_inversa = ["%i to %i" % (orig, dest) for (orig, dest) in SAtD + SAtI]
+            movi_reg = ["%i a %i" % (orig, dest) for (orig, dest) in SAdD + SAdI]
+            movi_inversa = ["%i a %i" % (orig, dest) for (orig, dest) in SAtD + SAtI]
             return movi_reg + movi_inversa
         else:
-            movi_inversa = ["%i to %i" % (orig, dest) for (orig, dest) in SAdD + SAdI]
-            movi_reg = ["%i to %i" % (orig, dest) for (orig, dest) in SAtD + SAtI]
+            movi_inversa = ["%i a %i" % (orig, dest) for (orig, dest) in SAdD + SAdI]
+            movi_reg = ["%i a %i" % (orig, dest) for (orig, dest) in SAtD + SAtI]
             return movi_inversa + movi_reg
 
 
@@ -110,13 +110,19 @@ def strings_movi(Tablero):
                 for (i, bit) in enumerate(bin(AtI)[::-1]) if bit == '1']
 
     if Tablero.activo == NEGRO:
-        movi_reg = ["%i to %i" % (orig, dest) for (orig, dest) in AdD + AdI]
-        movi_inversa = ["%i to %i" % (orig, dest) for (orig, dest) in AtD + AtI]
+        movi_reg = ["%i a %i" % (orig, dest) for (orig, dest) in AdD + AdI]
+        movi_inversa = ["%i a %i" % (orig, dest) for (orig, dest) in AtD + AtI]
         return movi_reg + movi_inversa
     else:
-        movi_reg = ["%i to %i" % (orig, dest) for (orig, dest) in AtD + AtI]
-        movi_inversa = ["%i to %i" % (orig, dest) for (orig, dest) in AdD + AdI]
+        movi_reg = ["%i a %i" % (orig, dest) for (orig, dest) in AtD + AtI]
+        movi_inversa = ["%i a %i" % (orig, dest) for (orig, dest) in AdD + AdI]
         return movi_inversa + movi_reg
 
 if __name__ == '__main__':
-    main()
+    try:
+        estado= main()
+        sys.exit(estado)
+    except:
+        print ("")
+        print ("Juego terminado.")
+        sys.exit(1)
