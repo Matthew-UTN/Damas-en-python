@@ -204,3 +204,141 @@ def peligro(Tablero):
 
     return len(saltos)
 
+def diferencia_de_fichas(Tablero, player):
+    peones_negros = bin(Tablero.adelante[NEGRO]).count("1")
+    reyes_negros = bin(Tablero.atras[NEGRO]).count("1")
+    puntaje_negro = 2*peones_negros + 3*reyes_negros
+    peones_blancos = bin(Tablero.atras[BLANCO]).count("1")
+    reyes_blancos = bin(Tablero.adelante[BLANCO]).count("1")
+    puntaje_blanco = 2*peones_blancos + 3*reyes_blancos
+
+    return puntaje_negro - puntaje_blanco if player == NEGRO else puntaje_blanco - puntaje_negro
+
+def posiciones(Tablero, player):
+    puntajes = [0x88000, 0x1904c00, 0x3A0502E0, 0x7C060301F]
+    i = 1
+    total = 0
+    for s in puntajes:
+        total = i*bin(Tablero.fichas[player] & s).count("1")
+        i += 1
+    return total
+
+def puntaje(Tablero_viejo, Tablero_nuevo):
+    if Tablero_viejo.se_termino():
+        return -INFINITO
+    if Tablero_nuevo.se_termino():
+        return INFINITO
+    _adv   = adv(Tablero_nuevo) - adv(Tablero_viejo)
+    _atras  = adv(Tablero_nuevo) - atras(Tablero_viejo)
+    _cent  = cent(Tablero_nuevo) - cent(Tablero_viejo)
+    _cntr  = cntr(Tablero_nuevo) - cntr(Tablero_viejo)
+    _negar  = negar(Tablero_nuevo) - negar(Tablero_viejo)
+    _kcent = kcent(Tablero_nuevo) - kcent(Tablero_viejo)
+    _mob   = mob(Tablero_nuevo) - mob(Tablero_viejo)
+    _mobil = _mob - _negar
+    _mov   = mov(Tablero_nuevo) - mov(Tablero_viejo)
+    _peligro = peligro(Tablero_nuevo) - peligro(Tablero_viejo)
+
+    mobilidad_que_no_esta_negado = 1 if _mobil > 0 else 0
+    mobilidad_total = 1 if _mob > 0 else 0
+    negacion_de_occ = 1 if _negar > 0 else 0
+    control = 1 if _cent > 0 else 0
+
+    _demmo = 1 if negacion_de_occ and not mobilidad_total else 0
+    _modo_2 = 1 if mobilidad_que_no_esta_negado and not negacion_de_occ else 0
+    _modo_3 = 1 if not mobilidad_que_no_esta_negado and negacion_de_occ else 0
+    _moc_2 = 1 if not mobilidad_que_no_esta_negado and control else 0
+    _moc_3 = 1 if mobilidad_que_no_esta_negado and not control else 0
+    _moc_4 = 1 if not mobilidad_que_no_esta_negado and not control else 0
+
+    Tablero_puntaje = _moc_2*(-1)*(2**18)  \
+                + _kcent*(2**16)       \
+                + _moc_4*(-1)*(2**14)  \
+                + _modo_3*(-1)*(2**13) \
+                + _demmo*(-1)*(2**11)  \
+                + _mov*(2**8)          \
+                + _adv*(-1)*(2**8)     \
+                + _modo_2*(-1)*(2**8)  \
+                + _atras*(-1)*(2**6)    \
+                + _cntr*(2**5)         \
+                + _peligro*(2**5)        \
+                + _moc_3*(2**4)        \
+                + diferencia_de_fichas(Tablero_nuevo, Tablero_viejo.activo)*(2**20) \
+                + posiciones(Tablero_nuevo, Tablero_viejo.activo)*(2**14)
+
+    return Tablero_puntaje
+
+def negamax(Tablero_viejo, Tablero_nuevo, profundo, alpha, beta, color):
+    if profundo == 0 or Tablero_nuevo.se_termino():
+        return puntaje(Tablero_viejo, Tablero_nuevo)*color
+    mejor_valor = -INFINITO
+    for opcion in Tablero_nuevo.sacar_movi():
+        B = Tablero_nuevo.ver_movimientos(opcion)
+        if B.activo != Tablero_nuevo.activo:
+            val = -negamax(Tablero_nuevo, B, profundo - 1, -beta, -alpha, -color)
+        else:
+            val = negamax(Tablero_nuevo, B, profundo, alpha, beta, color)
+        mejor_valor = max(mejor_valor, val)
+        alpha = max(alpha, val)
+        if alpha >= beta:
+            break
+    return mejor_valor
+
+def funcion_de_movimiento(Tablero, profundo=7):
+    def buscar(opcion):
+        B = Tablero.ver_movimientos(opcion)
+        if B.activo == Tablero.activo:
+            return negamax(Tablero, B, profundo, -INFINITO, INFINITO, 1)
+        else:
+            return negamax(Tablero, B, profundo, -INFINITO, INFINITO, -1)
+
+    return max(Tablero.sacar_movi(), key=buscar)
+
+def strings_movi(Tablero):
+    SAdD = Tablero.salto_adelante_D()
+    SAdI = Tablero.salto_adelante_I()
+    SAtD = Tablero.salto_atras_D()
+    SAtI = Tablero.salto_atras_I()
+
+    if (SAdD | SAdI | SAtD | SAtI) != 0:
+        SAdD = [(1 + i - i//9, 1 + (i + 8) - (i + 8)//9)
+                    for (i, bit) in enumerate(bin(SAdD)[::-1]) if bit == '1']
+        SAdI = [(1 + i - i//9, 1 + (i + 10) - (i + 8)//9)
+                    for (i, bit) in enumerate(bin(SAdI)[::-1]) if bit == '1']
+        SAtD = [(1 + i - i//9, 1 + (i - 8) - (i - 8)//9)
+                    for (i, bit) in enumerate(bin(SAtD)[::-1]) if bit ==  '1']
+        SAtI = [(1 + i - i//9, 1 + (i - 10) - (i - 10)//9)
+                    for (i, bit) in enumerate(bin(SAtI)[::-1]) if bit == '1']
+
+        if Tablero.activo == NEGRO:
+            movi_reg = ["%i to %i" % (orig, dest) for (orig, dest) in SAdD + SAdI]
+            movi_inversa = ["%i to %i" % (orig, dest) for (orig, dest) in SAtD + SAtI]
+            return movi_reg + movi_inversa
+        else:
+            movi_inversa = ["%i to %i" % (orig, dest) for (orig, dest) in SAdD + SAdI]
+            movi_reg = ["%i to %i" % (orig, dest) for (orig, dest) in SAtD + SAtI]
+            return movi_inversa + movi_reg
+
+
+    AdD = Tablero.adelante_D()
+    AdI = Tablero.adelante_I()
+    AtD = Tablero.atras_D()
+    AtI = Tablero.atras_I()
+
+    AdD = [(1 + i - i//9, 1 + (i + 4) - (i + 4)//9)
+                for (i, bit) in enumerate(bin(AdD)[::-1]) if bit == '1']
+    AdI = [(1 + i - i//9, 1 + (i + 5) - (i + 5)//9)
+                for (i, bit) in enumerate(bin(AdI)[::-1]) if bit == '1']
+    AtD = [(1 + i - i//9, 1 + (i - 4) - (i - 4)//9)
+                for (i, bit) in enumerate(bin(AtD)[::-1]) if bit ==  '1']
+    AtI = [(1 + i - i//9, 1 + (i - 5) - (i - 5)//9)
+                for (i, bit) in enumerate(bin(AtI)[::-1]) if bit == '1']
+
+    if Tablero.activo == NEGRO:
+        movi_reg = ["%i to %i" % (orig, dest) for (orig, dest) in AdD + AdI]
+        movi_inversa = ["%i to %i" % (orig, dest) for (orig, dest) in AtD + AtI]
+        return movi_reg + movi_inversa
+    else:
+        movi_reg = ["%i to %i" % (orig, dest) for (orig, dest) in AtD + AtI]
+        movi_inversa = ["%i to %i" % (orig, dest) for (orig, dest) in AdD + AdI]
+        return movi_inversa + movi_reg
