@@ -64,6 +64,68 @@ def main():
             print ("Gano blanco!")
 
         return 0
+    elif n == 1:
+        modulo_de_IA = input("Nombre del IA: ")
+        _import_(modulo_de_IA)
+        modulo_de_IA = sys.modules[modulo_de_IA]
+        cpu = agent.IA_Damas(modulo_de_IA.funcion_de_movimiento)
+        while True:
+            eleccion = input("0 para ir primero o 1 para ir segundo: ")
+            try:
+                eleccion = int(eleccion)
+                break
+            except ValueError:
+                print("Ingrese 0 o 1.")
+                continue
+        Turno = 0
+        B = checkers.TableroDamas()
+        jugador_actual = B.activo
+        print("Negro va primero.")
+        while not B.se_termino():
+            print(B)
+            if Turno % 2 == eleccion:
+                Movimientos = B.sacar_movi()
+                if B.salto:
+                    print("Salta.")
+                    print("")
+                else:
+                    print("Turno %i" % (Turno + 1))
+                    print("")
+                for (i, opcion) in enumerate(strings_movi(B)):
+                    print("opcion " + str(i) + ": " + opcion)
+                while True:
+                    movi_idx = input("Ingrese que movimiento quieres hacer: ")
+                    try:
+                        movi_idx = int(movi_idx)
+                    except ValueError:
+                        print("Ingrese un numero valido.")
+                        continue
+                    if movi_idx in range(len(Movimientos)):
+                        break
+                    else:
+                        print("Ingrese un numero valido.")
+                        continue
+                B.hacer_movi(Movimientos[movi_idx])
+                if B.activo == jugador_actual:
+                    print("Debe saltar.")
+                    continue
+                else:
+                    jugador_actual = B.activo
+                    Turno += 1
+            else:
+                B.hacer_movi(cpu.hacer_movi(B))
+                if B.activo == jugador_actual:
+                    print("Debe saltar.")
+                    continue
+                else:
+                    jugador_actual = B.activo
+                    Turno += 1
+        print(B)
+        if B.activo == BLANCO:
+            print("Gano negro!")
+        else:
+            print("Gano blanco!")
+        return 0
 
 
 def termino(Tablero):

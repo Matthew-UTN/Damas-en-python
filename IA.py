@@ -109,7 +109,7 @@ def negar(Tablero):  #Negacion de ocupaciones
                     if not dest in negaciones:
                         negaciones.append(dest)
                     continue
-                if not C.takeable(d):
+                if not C.tomable(d):
                     if not dest in negaciones:
                         negaciones.append(dest)
 
