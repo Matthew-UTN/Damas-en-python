@@ -67,15 +67,15 @@ def main():
             print ("Gano blanco!")
 
         return 0
-    elif n == 1:
-        modulo_de_IA = input("Nombre del IA: ")
+    else:
+        modulo_de_IA = "IA_Damas_Random" ##input("Nombre del IA: ")
         __import__(modulo_de_IA)
         modulo_de_IA = sys.modules[modulo_de_IA]
         cpu = IA_Damas.IA_Damas(modulo_de_IA.funcion_de_movimiento)
         while True:
-            eleccion = input("0 para ir primero o 1 para ir segundo: ")
+            choice = input("0 para ir primero o 1 para ir segundo: ")
             try:
-                eleccion = int(eleccion)
+                choice = int(choice)
                 break
             except ValueError:
                 print("Ingrese 0 o 1.")
@@ -86,7 +86,7 @@ def main():
         print("Negro va primero.")
         while not B.se_termino():
             print(B)
-            if Turno % 2 == eleccion:
+            if Turno % 2 == choice:
                 Movimientos = B.sacar_movi()
                 if B.salto:
                     print("Salta.")
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     try:
         estado= main()
         sys.exit(estado)
-    except:
+    except KeyboardInterrupt:
         print ("")
         print ("Juego terminado.")
         sys.exit(1)

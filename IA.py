@@ -122,12 +122,12 @@ def kcent(Tablero):  # Control del centro con un rey
     pasivo = Tablero.pasivo
     if pasivo == BLANCO:
         fichas_del_centro = 0xA619800
-        pasivo_kings = Tablero.adelante[BLANCO]
+        pasivo_reyes = Tablero.adelante[BLANCO]
     else:
         fichas_del_centro = 0xCC3280
-        pasivo_kings = Tablero.atras[NEGRO]
+        pasivo_reyes = Tablero.atras[NEGRO]
 
-    return bin(pasivo_kings & fichas_del_centro).count("1")
+    return bin(pasivo_reyes & fichas_del_centro).count("1")
 
 
 def mob(Tablero):  # movimiento total
@@ -181,7 +181,7 @@ def peligro(Tablero):
         if Tablero.activo == NEGRO:
             SAdD = (Tablero.vacio >> 8) & (Tablero.fichas[Tablero.pasivo] >> 4) & dest
             SAdI = (Tablero.vacio >> 10) & (Tablero.fichas[Tablero.pasivo] >> 5) & dest
-            if orig & Tablero.atras[Tablero.activo]: # piece is king
+            if orig & Tablero.atras[Tablero.activo]:
                 SAtD = (Tablero.vacio << 8) & (Tablero.fichas[Tablero.pasivo] << 4) & dest
                 SAtI = (Tablero.vacio << 10) & (Tablero.fichas[Tablero.pasivo] << 5) & dest
             else:
@@ -190,7 +190,7 @@ def peligro(Tablero):
         else:
             SAtD = (Tablero.vacio << 8) & (Tablero.fichas[Tablero.pasivo] << 4) & dest
             SAtI = (Tablero.vacio << 10) & (Tablero.fichas[Tablero.pasivo] << 5) & dest
-            if dest & Tablero.adelante[Tablero.activo]: # piece at square is a king
+            if dest & Tablero.adelante[Tablero.activo]:
                 SAdD = (Tablero.vacio >> 8) & (Tablero.fichas[Tablero.pasivo] >> 4) & dest
                 SAdI = (Tablero.vacio >> 10) & (Tablero.fichas[Tablero.pasivo] >> 5) & dest
             else:

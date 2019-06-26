@@ -156,7 +156,7 @@ class Tablero:
         if self.activo == NEGRO:
             SAdD = (self.vacio >> 8) & (self.fichas[self.pasivo] >> 4) & piece
             SAdI = (self.vacio >> 10) & (self.fichas[self.pasivo] >> 5) & piece
-            if piece & self.atras[self.activo]: # piece at square is a king
+            if piece & self.atras[self.activo]:
                 SAtD = (self.vacio << 8) & (self.fichas[self.pasivo] << 4) & piece
                 SAtI = (self.vacio << 10) & (self.fichas[self.pasivo] << 5) & piece
             else:
@@ -165,7 +165,7 @@ class Tablero:
         else:
             SAtD = (self.vacio << 8) & (self.fichas[self.pasivo] << 4) & piece
             SAtI = (self.vacio << 10) & (self.fichas[self.pasivo] << 5) & piece
-            if piece & self.adelante[self.activo]: # piece at square is a king
+            if piece & self.adelante[self.activo]:
                 SAdD = (self.vacio >> 8) & (self.fichas[self.pasivo] >> 4) & piece
                 SAdI = (self.vacio >> 10) & (self.fichas[self.pasivo] >> 5) & piece
             else:
