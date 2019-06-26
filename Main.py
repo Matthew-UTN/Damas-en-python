@@ -1,5 +1,8 @@
+import IA_Damas
 import Tablero
 import sys
+
+
 
 NEGRO, BLANCO = 0, 1
 
@@ -66,9 +69,9 @@ def main():
         return 0
     elif n == 1:
         modulo_de_IA = input("Nombre del IA: ")
-        _import_(modulo_de_IA)
+        __import__(modulo_de_IA)
         modulo_de_IA = sys.modules[modulo_de_IA]
-        cpu = agent.IA_Damas(modulo_de_IA.funcion_de_movimiento)
+        cpu = IA_Damas.IA_Damas(modulo_de_IA.funcion_de_movimiento)
         while True:
             eleccion = input("0 para ir primero o 1 para ir segundo: ")
             try:
@@ -78,7 +81,7 @@ def main():
                 print("Ingrese 0 o 1.")
                 continue
         Turno = 0
-        B = checkers.TableroDamas()
+        B = Tablero.Tablero()
         jugador_actual = B.activo
         print("Negro va primero.")
         while not B.se_termino():

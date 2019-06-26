@@ -1,4 +1,5 @@
 import sys
+from functools import reduce
 
 NEGRO, BLANCO = 0, 1
 lugares_validos = 0x7FBFDFEFF
